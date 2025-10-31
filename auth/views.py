@@ -8,13 +8,26 @@ from flask_jwt_extended import (
 )
 
 from api.schemas.user import UserCreateSchema, UserSchema
-from app import app
+from flask import current_app 
 from auth.helpers import revoke_token, is_token_revoked, add_token_to_database
 from extensions import pwd_context, jwt, db
 from models import User
 
 auth_blueprint = Blueprint("auth", __name__, url_prefix="/auth")
 
+
+@auth_blueprint.route("/", methods=["GET"])
+def index():
+    return jsonify({
+        "message": "Welcome to the Flask JWT Authentication API!",
+        "endpoints": {
+            "register": "/auth/register",
+            "login": "/auth/login",
+            "refresh": "/auth/refresh",
+            "revoke_access": "/auth/revoke_access",
+            "revoke_refresh": "/auth/revoke_refresh"
+        }
+    }), 200
 
 @auth_blueprint.route("/register", methods=["POST"])
 def register():
@@ -82,7 +95,7 @@ def revoke_refresh_token():
 
 @jwt.user_lookup_loader
 def user_loader_callback(jwt_headers, jwt_payload):
-    identity = jwt_payload[app.config["JWT_IDENTITY_CLAIM"]]
+    identity = jwt_payload[current_app.config["JWT_IDENTITY_CLAIM"]]
     return User.query.get(identity)
 
 

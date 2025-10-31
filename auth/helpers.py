@@ -3,7 +3,7 @@ from datetime import datetime
 from flask_jwt_extended import decode_token
 from sqlalchemy.orm.exc import NoResultFound
 
-from app import app
+from flask import current_app
 from extensions import db
 from models.auth import TokenBlocklist
 
@@ -12,7 +12,7 @@ def add_token_to_database(encoded_token):
     decoded_token = decode_token(encoded_token)
     jti = decoded_token["jti"]
     token_type = decoded_token["type"]
-    user_id = decoded_token[app.config["JWT_IDENTITY_CLAIM"]]
+    user_id = decoded_token[current_app.config["JWT_IDENTITY_CLAIM"]]
     expires = datetime.fromtimestamp(decoded_token["exp"])
 
     db_token = TokenBlocklist(
